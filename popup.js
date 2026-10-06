@@ -31,13 +31,9 @@ btn.onclick = async () => {
   if (running) return render(await send({ cmd: "stop" }));
   launching = true;
   status.textContent = "Opening LinkedIn...";
-  const GROW = "https://www.linkedin.com/mynetwork/grow/";
-  const [existing] = await chrome.tabs.query({ url: "https://www.linkedin.com/mynetwork/*" });
-  const tab = existing
-    ? await chrome.tabs.update(existing.id, { url: GROW, active: true })
-    : await chrome.tabs.create({ url: GROW, active: true });
   setTimeout(() => (launching = false), 8000);
-  chrome.runtime.sendMessage({ cmd: "launch", tabId: tab.id, max, dmin, dmax });
+  // The popup closes as soon as the new tab takes focus, so hand everything to the background worker.
+  chrome.runtime.sendMessage({ cmd: "launch", max, dmin, dmax });
 };
 
 const poll = async () => {
