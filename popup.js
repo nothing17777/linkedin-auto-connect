@@ -3,7 +3,8 @@ const status = document.getElementById("status");
 let running = false;
 
 async function send(msg) {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const [tab] = await chrome.tabs.query({ url: "https://www.linkedin.com/mynetwork/*" });
+  if (!tab) return { running: false, sent: 0, text: "Idle" };
   try {
     return await chrome.tabs.sendMessage(tab.id, msg);
   } catch {
@@ -13,8 +14,7 @@ async function send(msg) {
 
 function render(s) {
   if (!s) {
-    status.textContent = "Open linkedin.com/mynetwork/grow/ (then reload it).";
-    btn.disabled = true;
+    status.textContent = "Starting... (reload the LinkedIn tab if stuck)";
     return;
   }
   running = s.running;
@@ -27,7 +27,9 @@ btn.onclick = async () => {
   let dmin = parseFloat(document.getElementById("dmin").value) || 0.5;
   let dmax = parseFloat(document.getElementById("dmax").value) || 3;
   if (dmax < dmin) [dmin, dmax] = [dmax, dmin];
-  render(await send(running ? { cmd: "stop" } : { cmd: "start", max, dmin, dmax }));
+  if (running) return render(await send({ cmd: "stop" }));
+  chrome.runtime.sendMessage({ cmd: "launch", max, dmin, dmax });
+  status.textContent = "Opening LinkedIn...";
 };
 
 const poll = async () => render(await send({ cmd: "status" }));
