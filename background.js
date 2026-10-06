@@ -2,11 +2,7 @@ const GROW = "https://www.linkedin.com/mynetwork/grow/";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function launch(opts) {
-  const [existing] = await chrome.tabs.query({ url: "https://www.linkedin.com/mynetwork/*" });
-  const tab = existing
-    ? await chrome.tabs.update(existing.id, { url: GROW, active: true })
-    : await chrome.tabs.create({ url: GROW, active: true });
-  if (existing) await chrome.windows.update(tab.windowId, { focused: true });
+  const tab = { id: opts.tabId };
 
   // Wait for the page to finish loading, then give LinkedIn's UI time to render suggestions.
   await new Promise((resolve) => {

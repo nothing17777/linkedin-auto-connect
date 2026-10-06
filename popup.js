@@ -1,6 +1,7 @@
 const btn = document.getElementById("btn");
 const status = document.getElementById("status");
 let running = false;
+let launching = false;
 
 async function send(msg) {
   const [tab] = await chrome.tabs.query({ url: "https://www.linkedin.com/mynetwork/*" });
@@ -28,10 +29,18 @@ btn.onclick = async () => {
   let dmax = parseFloat(document.getElementById("dmax").value) || 3;
   if (dmax < dmin) [dmin, dmax] = [dmax, dmin];
   if (running) return render(await send({ cmd: "stop" }));
-  chrome.runtime.sendMessage({ cmd: "launch", max, dmin, dmax });
+  launching = true;
   status.textContent = "Opening LinkedIn...";
+  const GROW = "https://www.linkedin.com/mynetwork/grow/";
+  const [existing] = await chrome.tabs.query({ url: "https://www.linkedin.com/mynetwork/*" });
+  const tab = existing
+    ? await chrome.tabs.update(existing.id, { url: GROW, active: true })
+    : await chrome.tabs.create({ url: GROW, active: true });
+  chrome.runtime.sendMessage({ cmd: "launch", tabId: tab.id, max, dmin, dmax });
 };
 
-const poll = async () => render(await send({ cmd: "status" }));
+const poll = async () => {
+  if (!launching) render(await send({ cmd: "status" }));
+};
 poll();
 setInterval(poll, 700);
