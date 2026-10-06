@@ -3,7 +3,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const tryStart = async (tabId, opts) => {
   try {
-    await chrome.tabs.sendMessage(tabId, { cmd: "start", ...opts });
+    await chrome.tabs.sendMessage(tabId, { ...opts, cmd: "start" });
     return true;
   } catch {
     return false;
