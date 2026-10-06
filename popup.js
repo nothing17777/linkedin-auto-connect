@@ -36,6 +36,7 @@ btn.onclick = async () => {
   const tab = existing
     ? await chrome.tabs.update(existing.id, { url: GROW, active: true })
     : await chrome.tabs.create({ url: GROW, active: true });
+  setTimeout(() => (launching = false), 8000);
   chrome.runtime.sendMessage({ cmd: "launch", tabId: tab.id, max, dmin, dmax });
 };
 

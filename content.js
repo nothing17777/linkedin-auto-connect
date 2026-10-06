@@ -3,7 +3,9 @@
   window.__lacLoaded = true;
 
   // Connect buttons: aria-label="Invite <Name> to connect" (from the page DOM).
-  const CONNECT_SEL = 'button[aria-label^="Invite"][aria-label$="to connect"]';
+  const CONNECT_SEL = 'button[aria-label*="to connect" i]';
+  const findConnect = () =>
+    [...document.querySelectorAll(CONNECT_SEL)].filter((b) => !b.dataset.lacDone && !b.disabled);
   const OVERHEAD = 400; // fixed click/scroll waits per invite (ms)
   let minDelay = 100;
   let maxDelay = 2600;
@@ -44,14 +46,15 @@
   async function run(max) {
     running = true;
     sent = 0;
+    text = "Started...";
     let empty = 0;
     let hitLimit = false;
 
-    while (running && sent < max && empty < 4) {
-      const target = [...document.querySelectorAll(CONNECT_SEL)].find((b) => !b.dataset.lacDone);
+    while (running && sent < max && empty < 12) {
+      const target = findConnect()[0];
       if (!target) {
         empty++;
-        text = `Sent ${sent}/${max} — loading more...`;
+        text = `Sent ${sent}/${max} — looking for Connect buttons (${empty}/12)...`;
         const more = [...document.querySelectorAll("button")].find((b) => /^show more$/i.test(b.textContent.trim()));
         if (more) more.click();
         window.scrollBy({ top: window.innerHeight, behavior: "smooth" });
